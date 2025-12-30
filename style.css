@@ -1,0 +1,19 @@
+*{
+    box-sizing: border-box;
+}
+html, body{
+    padding: 0;
+    margin: 0;
+    color: black;
+    background-color: #ffcb04;
+}
+header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+h1{
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 32px;
+}
