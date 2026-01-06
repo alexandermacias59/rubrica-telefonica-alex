@@ -27,16 +27,29 @@ export function deleteContact(id) {
     .then(result => result)
     .catch(error => console.error('Aiuuutoooo!', error))
 }
-// fetch('https://PROJECT_TOKEN.mockapi.io/tasks', {
-//   method: 'GET',
-//   headers: {'content-type':'application/json'},
-// }).then(res => {
-//   if (res.ok) {
-//       return res.json();
-//   }
-//   // handle error
-// }).then(tasks => {
-//   // Do something with the list of tasks
-// }).catch(error => {
-//   // handle error
-// })
+
+export function updateContact(id, updatedContact) {
+    const apiUrl = `${baseUrl}/${id}`;
+
+    return fetch(apiUrl, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updatedContact)
+    })
+    .then(response => response.json())
+    .catch(error => console.error("Errore update:", error));
+}
+
+export function createContact(newContact) {
+    return fetch(baseUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newContact)
+    })
+    .then(response => response.json())
+    .catch(error => console.error("Errore creazione contatto:", error));
+}

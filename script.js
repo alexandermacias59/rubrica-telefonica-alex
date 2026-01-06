@@ -1,16 +1,16 @@
-import { getAllContacts, deleteContact } from "./service.js";
+import { getAllContacts, createContact, updateContact, deleteContact } from "./service.js";
 
 const searchInput = document.getElementById("search-bar");
 const searchButton = document.getElementById("search-btn");
 const sortButton = document.getElementById("sort-btn");
+const newContactButton = document.getElementById("new-contact-btn");
+const cardContainer = document.getElementById("card-container");
+
 
 let allContacts = [];
 
-/* =========================
-   RENDER CONTATTI
-========================= */
+
 function displayCard(contacts) {
-    const cardContainer = document.getElementById("card-container");
     cardContainer.innerHTML = "";
 
     if (contacts.length === 0) {
@@ -28,79 +28,121 @@ function displayCard(contacts) {
                 <button class="modify-btn">+</button>
             </div>
             <div class="contact-info">
-                <span>Nome: ${contact.name}</span>
-                <span>Cognome: ${contact.lastName}</span>
-                <span>Telefono: ${contact.phoneNumber}</span>
+                <span>${contact.name}</span>
+                <span>${contact.lastName}</span>
+                <span>${contact.phoneNumber}</span>
             </div>
         `;
 
         // DELETE
-        const deleteBtn = card.querySelector(".delete-btn");
-        deleteBtn.addEventListener("click", () => {
-            handleDelete(contact.id);
-        });
+        card.querySelector(".delete-btn")
+            .addEventListener("click", () => handleDelete(contact.id));
+
+        // MODIFY
+        card.querySelector(".modify-btn")
+            .addEventListener("click", () => handleModify(contact));
 
         cardContainer.appendChild(card);
     }
 }
 
-/* =========================
-   FETCH INIZIALE
-========================= */
+
 getAllContacts().then(contacts => {
     allContacts = contacts;
     displayCard(allContacts);
 });
 
-/* =========================
-   RICERCA
-========================= */
+/* ricerca contatto*/
 function handleSearch() {
-    const searchValue = searchInput.value.toLowerCase().trim();
+    const value = searchInput.value.toLowerCase().trim();
 
-    if (searchValue === "") {
+    if (value === "") {
         displayCard(allContacts);
         return;
     }
 
-    const filteredContacts = allContacts.filter(contact =>
-        contact.name.toLowerCase().includes(searchValue) ||
-        contact.lastName.toLowerCase().includes(searchValue) ||
-        contact.phoneNumber.includes(searchValue)
+    const filtered = allContacts.filter(c =>
+        c.name.toLowerCase().includes(value) ||
+        c.lastName.toLowerCase().includes(value) ||
+        c.phoneNumber.includes(value)
     );
 
-    displayCard(filteredContacts);
+    displayCard(filtered);
 }
 
 searchButton.addEventListener("click", handleSearch);
-searchInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-        handleSearch();
-    }
+
+searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleSearch();
 });
 
-
-/* =========================
-   ORDINAMENTO A–Z
-========================= */
+/* ordine alfabetico*/
 function orderByName() {
-    const sortedContacts = [...allContacts].sort((a, b) =>
+    const sorted = [...allContacts].sort((a, b) =>
         a.name.localeCompare(b.name)
     );
-
-    displayCard(sortedContacts);
+    displayCard(sorted);
 }
 
 if (sortButton) {
     sortButton.addEventListener("click", orderByName);
 }
 
-/* =========================
-   DELETE CONTATTO
-========================= */
+/* aggiungi*/
+function handleCreateContact() {
+    const name = prompt("Nome:");
+    if (!name) return;
+
+    const lastName = prompt("Cognome:");
+    if (!lastName) return;
+
+    const phoneNumber = prompt("Telefono:");
+    if (!phoneNumber) return;
+
+    const newContact = {
+        name: name.trim(),
+        lastName: lastName.trim(),
+        phoneNumber: phoneNumber.trim()
+    };
+
+    createContact(newContact).then(created => {
+        allContacts.push(created);
+        displayCard(allContacts);
+    });
+}
+
+if (newContactButton) {
+    newContactButton.addEventListener("click", handleCreateContact);
+}
+
+/* modifica contatto*/
+function handleModify(contact) {
+    const name = prompt("Nome:", contact.name);
+    if (name === null) return;
+
+    const lastName = prompt("Cognome:", contact.lastName);
+    if (lastName === null) return;
+
+    const phoneNumber = prompt("Telefono:", contact.phoneNumber);
+    if (phoneNumber === null) return;
+
+    const updatedContact = {
+        name: name.trim(),
+        lastName: lastName.trim(),
+        phoneNumber: phoneNumber.trim()
+    };
+
+    updateContact(contact.id, updatedContact).then(updated => {
+        allContacts = allContacts.map(c =>
+            c.id === contact.id ? updated : c
+        );
+        displayCard(allContacts);
+    });
+}
+
+/* elimina contatto*/
 function handleDelete(contactId) {
     const confirmDelete = confirm("Vuoi eliminare il contatto?");
-
     if (!confirmDelete) return;
 
     deleteContact(contactId).then(() => {
@@ -108,3 +150,5 @@ function handleDelete(contactId) {
         displayCard(allContacts);
     });
 }
+
+
